@@ -1,11 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-typedef struct Matrix {
-    int rows;
-    int cols;
-    double* data; // Pointer to matrix data. Data is stored in a 1D array: 1st row, then 2nd row, etc.
-} Matrix; // Alias for struct Matrix
+#include "matrix.h"
 
 Matrix create_matrix(int rows, int cols) {
     // Creates a matrix with the given dimensions, with all elements initialised to 0.
@@ -53,20 +48,20 @@ double get_element(const Matrix* matrix, int row, int col) {
     return matrix->data[(row * matrix->cols) + col];
 }
 
-Matrix matrix_addition(const Matrix* a, const Matrix* b) {
+Matrix matrix_addition(const Matrix* matrix_a, const Matrix* matrix_b) {
     // Error handling for matrices that do not have the same dimensions.
-    if (a->rows != b->rows || a->cols != b->cols) {
+    if (matrix_a->rows != matrix_b->rows || matrix_a->cols != matrix_b->cols) {
         printf("Incompatible dimensions for matrix addition.\n");
         return create_matrix(0, 0); // Empty matrix returned to indicate error.
     }
 
     // Calculates and returns the resulting matrix from adding the two matrices.
-    Matrix result = create_matrix(a->rows, a->cols);
+    Matrix result = create_matrix(matrix_a->rows, matrix_a->cols);
 
-    for (int row_count=0; row_count < a->rows; row_count++) {
-        for (int col_count=0; col_count < a->cols; col_count++) {
-            double ele_a = get_element(a, row_count, col_count);
-            double ele_b = get_element(b, row_count, col_count);
+    for (int row_count=0; row_count < matrix_a->rows; row_count++) {
+        for (int col_count=0; col_count < matrix_a->cols; col_count++) {
+            double ele_a = get_element(matrix_a, row_count, col_count);
+            double ele_b = get_element(matrix_b, row_count, col_count);
             double ele_result = ele_a + ele_b;
 
             set_element(&result, row_count, col_count, ele_result);
@@ -76,21 +71,21 @@ Matrix matrix_addition(const Matrix* a, const Matrix* b) {
     return result;
 }
 
-Matrix matrix_multiplication(const Matrix* a, const Matrix* b) {
+Matrix matrix_multiplication(const Matrix* matrix_a, const Matrix* matrix_b) {
     // Error handling for matrices that cannot be multiplied together. 
-    if (a->cols != b->rows) {
+    if (matrix_a->cols != matrix_b->rows) {
         printf("Incompatible dimensions for matrix multiplication.\n");
         return create_matrix(0, 0); // Empty matrix returned to indicate error.
     }
 
     // Calculates and returns the resulting matrix from multiplying the two matrices.
-    Matrix result = create_matrix(a->rows, b->cols);
+    Matrix result = create_matrix(matrix_a->rows, matrix_b->cols);
 
-    for (int i=0; i < a->rows; i++) {
-        for (int j=0; j < b->cols; j++) {
+    for (int i=0; i < matrix_a->rows; i++) {
+        for (int j=0; j < matrix_b->cols; j++) {
             double ele = 0;
-            for (int k=0; k < a->cols; k++) {
-                ele += get_element(a, i, k) * get_element(b, k, j);
+            for (int k=0; k < matrix_a->cols; k++) {
+                ele += get_element(matrix_a, i, k) * get_element(matrix_b, k, j);
             }
             set_element(&result, i, j, ele);
         }
@@ -114,7 +109,7 @@ Matrix transpose(const Matrix* matrix) {
 }
 
 void display_matrix(const Matrix* matrix) {
-    // This function is just for visualising matrices for testing purposes. May be removed later
+    // Displays a matrix in a more human-readable format for testing purposes.
     for (int row_count=0; row_count < matrix->rows; row_count++) {
         printf("[ ");
         for (int col_count=0; col_count < matrix->cols; col_count++) {
@@ -122,33 +117,4 @@ void display_matrix(const Matrix* matrix) {
         }
         printf("]\n");
     }
-}
-
-int main() {
-    // Just a test sequence, will be removed later.
-    Matrix matrix_a = create_matrix(2, 2);
-    Matrix matrix_b = create_matrix(2, 2);
-    Matrix result;
-
-    set_element(&matrix_a, 0, 0, 5);
-    set_element(&matrix_a, 0, 1, 7);
-    set_element(&matrix_a, 1, 0, 13);
-    set_element(&matrix_a, 1, 1, 4);
-
-    set_element(&matrix_b, 0, 0, 8);
-    set_element(&matrix_b, 0, 1, 0);
-    set_element(&matrix_b, 1, 0, 9);
-    set_element(&matrix_b, 1, 1, 27);
-
-    result = matrix_multiplication(&matrix_a, &matrix_b);
-    
-    display_matrix(&matrix_a);
-    printf(" \n");
-    display_matrix(&matrix_b);
-    printf(" \n");
-    display_matrix(&result);
-
-    free_matrix(&matrix_a);
-    free_matrix(&matrix_b);
-    free_matrix(&result);
 }
