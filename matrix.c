@@ -1,24 +1,40 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct Matrix {
+typedef struct Matrix {
     int rows;
     int cols;
-    double* data; // Data stored in flat 1D array: 1st row, then 2nd row, then 3rd row, etc.
-};
-
-typedef struct Matrix Matrix; // So can just use Matrix, instead of always using struct Matrix
+    double* data; // Pointer to matrix data. Data is stored in a 1D array: 1st row, then 2nd row, etc.
+} Matrix; // Alias for struct Matrix
 
 Matrix create_matrix(int rows, int cols) {
+    // Creates a matrix with the given dimensions, with all elements initialised to 0.
     Matrix new_matrix;
     new_matrix.rows = rows;
     new_matrix.cols = cols;
-    new_matrix.data = calloc(rows * cols, sizeof(double));
+
+    // If either dimension is less than or equal to zero, return an empty matrix.
+    if (rows <= 0 || cols <= 0) {
+        new_matrix.rows = 0;
+        new_matrix.cols = 0;
+        new_matrix.data = NULL;
+    }
+    else {
+        new_matrix.data = calloc(rows * cols, sizeof(double));
+
+        // Checking if memory allocation failed.
+        if (new_matrix.data == NULL) {
+            printf("Memory allocation failed\n");
+            new_matrix.rows = 0;
+            new_matrix.cols = 0;
+        }
+    }
 
     return new_matrix;
 }
 
 void free_matrix(Matrix* matrix) {
+    // Frees memory allocated to matrix that is no longer needed.
     if (matrix->data != NULL) {
         free(matrix->data);
         matrix->data = NULL;
@@ -28,18 +44,23 @@ void free_matrix(Matrix* matrix) {
 }
 
 void set_element(Matrix* matrix, int row, int col, double data_item) {
+    // Sets the specified element of a matrix to the specified value.
     matrix->data[(row * matrix->cols) + col] = data_item;
 }
 
-double get_element(Matrix* matrix, int row, int col) {
+double get_element(const Matrix* matrix, int row, int col) {
+    // Retrieves the specified element of a matrix.
     return matrix->data[(row * matrix->cols) + col];
 }
 
-Matrix matrix_addition(Matrix* a, Matrix* b) {
+Matrix matrix_addition(const Matrix* a, const Matrix* b) {
+    // Error handling for matrices that do not have the same dimensions.
     if (a->rows != b->rows || a->cols != b->cols) {
-        // Error handling TBA
+        printf("Incompatible dimensions for matrix addition.\n");
+        return create_matrix(0, 0); // Empty matrix returned to indicate error.
     }
 
+    // Calculates and returns the resulting matrix from adding the two matrices.
     Matrix result = create_matrix(a->rows, a->cols);
 
     for (int row_count=0; row_count < a->rows; row_count++) {
@@ -55,11 +76,14 @@ Matrix matrix_addition(Matrix* a, Matrix* b) {
     return result;
 }
 
-Matrix matrix_multiplication(Matrix* a, Matrix* b) {
+Matrix matrix_multiplication(const Matrix* a, const Matrix* b) {
+    // Error handling for matrices that cannot be multiplied together. 
     if (a->cols != b->rows) {
-        // Error handling TBA
+        printf("Incompatible dimensions for matrix multiplication.\n");
+        return create_matrix(0, 0); // Empty matrix returned to indicate error.
     }
 
+    // Calculates and returns the resulting matrix from multiplying the two matrices.
     Matrix result = create_matrix(a->rows, b->cols);
 
     for (int i=0; i < a->rows; i++) {
@@ -75,7 +99,7 @@ Matrix matrix_multiplication(Matrix* a, Matrix* b) {
     return result;
 }
 
-Matrix transpose(Matrix* matrix) {
+Matrix transpose(const Matrix* matrix) {
     // Constructs and returns the transpose of the matrix.
     Matrix result = create_matrix(matrix->cols, matrix->rows);
 
@@ -89,13 +113,12 @@ Matrix transpose(Matrix* matrix) {
     return result;
 }
 
-void display_matrix(Matrix* matrix) {
+void display_matrix(const Matrix* matrix) {
     // This function is just for visualising matrices for testing purposes. May be removed later
     for (int row_count=0; row_count < matrix->rows; row_count++) {
         printf("[ ");
         for (int col_count=0; col_count < matrix->cols; col_count++) {
-            printf("%f", get_element(matrix, row_count, col_count));
-            printf(" ");
+            printf("%f ", get_element(matrix, row_count, col_count));
         }
         printf("]\n");
     }
