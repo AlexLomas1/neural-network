@@ -1,16 +1,12 @@
-#include "matrix.h"
-
 #ifndef ACTIVATION_H
 #define ACTIVATION_H
-
-// Applies a given activation function to each element in a matrix.
-void apply_activation(Matrix* matrix, double (*activation)(double));
 
 // 1 / (1 + e^{-x})
 double sigmoid(double x);
 
 // (e^{x} - e^{-x}) / (e^{x} + e^{-x})
-double tanh(double x);
+// Named custom to prevent conflict with math.h tanh function.
+double tanh_custom(double x);
 
 // max(0, x)
 double ReLu(double x);

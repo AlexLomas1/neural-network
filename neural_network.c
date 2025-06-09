@@ -86,7 +86,7 @@ Matrix forward_pass(Network* net, Matrix* input) {
         printf("\nLayer output pre-activation:\n");
         display_matrix(&layer_out);
 
-        apply_activation(&layer_out, net->layers[i].activation_func_ptr);
+        apply_func(&layer_out, net->layers[i].activation_func_ptr);
         free_matrix(&temp);
 
         if (i != (net->num_layers-1)) {

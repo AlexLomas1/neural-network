@@ -108,6 +108,17 @@ Matrix transpose(const Matrix* matrix) {
     return result;
 }
 
+void apply_func(Matrix* matrix, double (*func)(double)) {
+    // Applies a given function to each element in a matrix.
+    for (int row_count=0; row_count < matrix->rows; row_count++) {
+        for (int col_count=0; col_count < matrix->cols; col_count++) {
+            double in = get_element(matrix, row_count, col_count);
+            double out = func(in);
+            set_element(matrix, row_count, col_count, out);
+        }
+    }
+}
+
 void display_matrix(const Matrix* matrix) {
     // Displays a matrix in a more human-readable format for testing purposes.
     for (int row_count=0; row_count < matrix->rows; row_count++) {

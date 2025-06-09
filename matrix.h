@@ -28,6 +28,9 @@ Matrix matrix_multiplication(const Matrix* matrix_a, const Matrix* matrix_b);
 // Constructs and returns the transpose of the matrix.
 Matrix transpose(const Matrix* matrix);
 
+// Applies a given function to each element in a matrix.
+void apply_func(Matrix* matrix, double (*activation)(double));
+
 // Displays a matrix in a more human-readable format for testing purposes.
 void display_matrix(const Matrix* matrix);
 
