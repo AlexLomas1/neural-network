@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "matrix.h"
+#include "activation.h"
 
 typedef struct Layer {
     Matrix weights;
     Matrix biases;
+    double (*activation_func_ptr)(double);
     int num_nodes;
 } Layer;
 
@@ -13,17 +15,18 @@ typedef struct Network {
     int num_layers;
 } Network;
 
-Layer init_layer(int input_size, int output_size) {
+Layer init_layer(int input_size, int output_size, double (*activation)(double)) {
     // Initialises a layer with weight and bias matrices having all elements as zero.
     Layer new_layer;
     new_layer.weights = create_matrix(output_size, input_size);
     new_layer.biases = create_matrix(output_size, 1);
+    new_layer.activation_func_ptr = activation;
     new_layer.num_nodes = output_size;
 
     return new_layer;
 }
 
-Network init_neural_net(int num_layers, int input_nodes, int layer_sizes[]) {
+Network init_neural_net(int num_layers, int input_nodes, int layer_sizes[], double (*activations[])(double)) {
     // Initialises a neural network with the given number of layers, and number of nodes for each layer.
     Network new_network;
     new_network.num_layers = num_layers;
@@ -38,7 +41,7 @@ Network init_neural_net(int num_layers, int input_nodes, int layer_sizes[]) {
             input_size = new_network.layers[i-1].num_nodes;
         }
 
-        new_network.layers[i] = init_layer(input_size, layer_sizes[i]);
+        new_network.layers[i] = init_layer(input_size, layer_sizes[i], activations[i]);
     }
 
     return new_network;
@@ -79,10 +82,15 @@ Matrix forward_pass(Network* net, Matrix* input) {
         // the weight matrix of the layer, and b is the bias matrix of the layer.
         temp = matrix_multiplication(&net->layers[i].weights, &layer_in);
         layer_out = matrix_addition(&temp, &net->layers[i].biases);
+
+        printf("\nLayer output pre-activation:\n");
+        display_matrix(&layer_out);
+
+        apply_activation(&layer_out, net->layers[i].activation_func_ptr);
         free_matrix(&temp);
 
         if (i != (net->num_layers-1)) {
-            printf("\nLayer output:\n");
+            printf("\nLayer output post-activation:\n");
         }
         else {
             printf("\nResult:\n");
@@ -98,13 +106,17 @@ Matrix forward_pass(Network* net, Matrix* input) {
 }
 
 void main() {
-    // Layer sizes and number of layers hardcoded for now. In future, these could be retrieved from a
-    // seperate file.
+    // Layer sizes, number of layers, and activation functions hardcoded for now. In future, these could
+    // be retrieved from a seperate file.
     int layer_sizes[2];
     layer_sizes[0] = 2;
     layer_sizes[1] = 1;
+    double (*activations[2])(double);
+    activations[0] = &ReLu;
+    activations[1] = &ReLu;
+
     Network test_net;
-    test_net = init_neural_net(2, 2, layer_sizes);
+    test_net = init_neural_net(2, 2, layer_sizes, activations);
 
     // Setting preset weights and biases.
     set_element(&test_net.layers[0].weights, 0, 0, 4);
