@@ -6,7 +6,7 @@
 typedef struct Layer {
     Matrix weights;
     Matrix biases;
-    double (*activation_func_ptr)(double);
+    const ActivationFunc* activation;
     int num_nodes;
 } Layer;
 
@@ -15,18 +15,18 @@ typedef struct Network {
     int num_layers;
 } Network;
 
-Layer init_layer(int input_size, int output_size, double (*activation)(double)) {
+Layer init_layer(int input_size, int output_size, const ActivationFunc* activation) {
     // Initialises a layer with weight and bias matrices having all elements as zero.
     Layer new_layer;
     new_layer.weights = create_matrix(output_size, input_size);
     new_layer.biases = create_matrix(output_size, 1);
-    new_layer.activation_func_ptr = activation;
+    new_layer.activation = activation;
     new_layer.num_nodes = output_size;
 
     return new_layer;
 }
 
-Network init_neural_net(int num_layers, int input_nodes, int layer_sizes[], double (*activations[])(double)) {
+Network init_neural_net(int num_layers, int input_nodes, int layer_sizes[], const ActivationFunc* activations[]) {
     // Initialises a neural network with the given number of layers, and number of nodes for each layer.
     Network new_network;
     new_network.num_layers = num_layers;
@@ -49,13 +49,12 @@ Network init_neural_net(int num_layers, int input_nodes, int layer_sizes[], doub
 
 void free_network(Network* net) {
     // Frees memory allocated to layers, weight matrices, and bias matrices in the network.
-    for (int i=0; i < net->num_layers; i++) {
-        free_matrix(&net->layers[i].weights);
-        free_matrix(&net->layers[i].biases);
-        net->layers[i].num_nodes = 0;
-    }
-
     if (net->layers != NULL) {
+        for (int i=0; i < net->num_layers; i++) {
+            free_matrix(&net->layers[i].weights);
+            free_matrix(&net->layers[i].biases);
+            net->layers[i].num_nodes = 0;
+        }
         free(net->layers);
         net->layers = NULL;
     }
@@ -86,7 +85,7 @@ Matrix forward_pass(Network* net, Matrix* input) {
         printf("\nLayer output pre-activation:\n");
         display_matrix(&layer_out);
 
-        apply_func(&layer_out, net->layers[i].activation_func_ptr);
+        apply_func(&layer_out, net->layers[i].activation->func_ptr);
         free_matrix(&temp);
 
         if (i != (net->num_layers-1)) {
@@ -111,9 +110,10 @@ void main() {
     int layer_sizes[2];
     layer_sizes[0] = 2;
     layer_sizes[1] = 1;
-    double (*activations[2])(double);
+
+    const ActivationFunc* activations[2];
     activations[0] = &ReLu;
-    activations[1] = &ReLu;
+    activations[1] = &sigmoid;
 
     Network test_net;
     test_net = init_neural_net(2, 2, layer_sizes, activations);
