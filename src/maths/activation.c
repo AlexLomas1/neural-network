@@ -1,5 +1,5 @@
 #include <math.h>
-#include "activation.h"
+#include "maths/activation.h"
 
 // Custom included in tanh name to prevent conflict with tanh function in math.h
 const ActivationFunc sigmoid = {&sigmoid_func, &sigmoid_derivative};

@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "neural_network.h"
-#include "matrix.h"
-#include "activation.h"
+#include "nn/neural_network.h"
+#include "maths/matrix.h"
+#include "maths/activation.h"
 
 Layer init_layer(int input_size, int output_size, const ActivationFunc* activation) {
     // Initialises a layer with weight and bias matrices having all elements as zero.

@@ -1,5 +1,6 @@
 #include <math.h>
-#include "matrix.h"
+#include "maths/loss.h"
+#include "maths/matrix.h"
 
 double mean_squared_error(Matrix* y, Matrix* y_pred) {
     double squared_diff_sum = 0;

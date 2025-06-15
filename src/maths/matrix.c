@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "matrix.h"
+#include "maths/matrix.h"
 
 Matrix create_matrix(int rows, int cols) {
     // Creates a matrix with the given dimensions, with all elements initialised to 0.
