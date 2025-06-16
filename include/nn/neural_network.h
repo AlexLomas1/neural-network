@@ -10,6 +10,9 @@ typedef struct Layer {
     Matrix* biases;
     const ActivationFunc* activation;
     int num_nodes;
+
+    Matrix* z; // Pre-activation output of layer
+    Matrix* a; // Post-activation output of layer
 } Layer;
 
 typedef struct Network {

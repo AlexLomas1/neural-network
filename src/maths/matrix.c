@@ -48,6 +48,19 @@ double get_element(const Matrix* matrix, int row, int col) {
     return matrix->data[(row * matrix->cols) + col];
 }
 
+Matrix copy_matrix(const Matrix* original) {
+    // Creates a deep copy of a matrix.
+    Matrix copy = create_matrix(original->rows, original->cols);
+    for (int row_count=0; row_count < original->rows; row_count++) {
+        for (int col_count=0; col_count < original->cols; col_count++) {
+            double ele = get_element(original, row_count, col_count);
+            set_element(&copy, row_count, col_count, ele);
+        }
+    }
+
+    return copy;
+}
+
 Matrix matrix_addition(const Matrix* matrix_a, const Matrix* matrix_b) {
     // Error handling for matrices that do not have the same dimensions.
     if (matrix_a->rows != matrix_b->rows || matrix_a->cols != matrix_b->cols) {

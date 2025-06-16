@@ -19,6 +19,9 @@ void set_element(Matrix* matrix, int row, int col, double data_item);
 // Retrieves the specified element of a matrix.
 double get_element(const Matrix* matrix, int row, int col);
 
+// Creates a deep copy of a matrix.
+Matrix copy_matrix(const Matrix* original);
+
 // Calculates and returns the resulting matrix from adding the two matrices.
 Matrix matrix_addition(const Matrix* matrix_a, const Matrix* matrix_b);
 
