@@ -107,6 +107,29 @@ Matrix matrix_multiplication(const Matrix* matrix_a, const Matrix* matrix_b) {
     return result;
 }
 
+Matrix hadamard_product(const Matrix* matrix_a, const Matrix* matrix_b) {
+    // Error handling for matrices that do not have same dimensions.
+    if (matrix_a->rows != matrix_b->rows || matrix_a->cols != matrix_b->cols) {
+        printf("Incompatable dimensions for Hadamard product.\n");
+        return create_matrix(0, 0); // Empty matrix returned to indicate error.
+    }
+
+    // Calculates and returns the resulting matrix from performing the Hadamard product of two matrices.
+    Matrix result = create_matrix(matrix_a->rows, matrix_a->cols);
+
+    for (int row_count=0; row_count < matrix_a->rows; row_count++) {
+        for (int col_count=0; col_count < matrix_a->cols; col_count++) {
+            double ele_a = get_element(matrix_a, row_count, col_count);
+            double ele_b = get_element(matrix_b, row_count, col_count);
+            double ele_result = ele_a * ele_b;
+
+            set_element(&result, row_count, col_count, ele_result);
+        }
+    }
+
+    return result;
+}
+
 Matrix transpose(const Matrix* matrix) {
     // Constructs and returns the transpose of the matrix.
     Matrix result = create_matrix(matrix->cols, matrix->rows);

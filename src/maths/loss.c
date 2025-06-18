@@ -3,6 +3,10 @@
 #include "maths/loss.h"
 #include "maths/matrix.h"
 
+const LossFunc MSE = {&mean_squared_error, &mean_squared_error_derivative};
+const LossFunc MAE = {&mean_absolute_error, &mean_absolute_error_derivative};
+const LossFunc BCE = {&binary_cross_entropy, &binary_cross_entropy_derivative};
+
 double mean_squared_error(Matrix* y, Matrix* y_pred) {
     double squared_diff_sum = 0;
     for (int row_count=0; row_count < y->rows; row_count++) {

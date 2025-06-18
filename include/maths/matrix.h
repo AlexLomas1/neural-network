@@ -28,6 +28,9 @@ Matrix matrix_addition(const Matrix* matrix_a, const Matrix* matrix_b);
 // Calculates and returns the resulting matrix from multiplying the two matrices.
 Matrix matrix_multiplication(const Matrix* matrix_a, const Matrix* matrix_b);
 
+// Calculates and returns the resulting matrix from performing the Hadamard product of two matrices.
+Matrix hadamard_product(const Matrix* matrix_a, const Matrix* matrix_b);
+
 // Constructs and returns the transpose of the matrix.
 Matrix transpose(const Matrix* matrix);
 
