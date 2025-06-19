@@ -7,7 +7,7 @@ const LossFunc MSE = {&mean_squared_error, &mean_squared_error_derivative};
 const LossFunc MAE = {&mean_absolute_error, &mean_absolute_error_derivative};
 const LossFunc BCE = {&binary_cross_entropy, &binary_cross_entropy_derivative};
 
-double mean_squared_error(Matrix* y, Matrix* y_pred) {
+double mean_squared_error(const Matrix* y, const Matrix* y_pred) {
     double squared_diff_sum = 0;
     for (int row_count=0; row_count < y->rows; row_count++) {
         double diff = get_element(y, row_count, 0) - get_element(y_pred, row_count, 0);
@@ -17,7 +17,7 @@ double mean_squared_error(Matrix* y, Matrix* y_pred) {
     return (squared_diff_sum / y->rows);
 }
 
-Matrix* mean_squared_error_derivative(Matrix* y, Matrix* y_pred) {
+Matrix mean_squared_error_derivative(const Matrix* y, const Matrix* y_pred) {
     // Creates matrix of MSE's partial derivatives with respect to each of the predictions.
     Matrix gradient_matrix = create_matrix(y->rows, 1);
     
@@ -26,13 +26,10 @@ Matrix* mean_squared_error_derivative(Matrix* y, Matrix* y_pred) {
         set_element(&gradient_matrix, row_count, 0, grad);
     }
 
-    Matrix* output = malloc(sizeof(Matrix));
-    *output = gradient_matrix;
-
-    return output;
+    return gradient_matrix;
 }
 
-double mean_absolute_error(Matrix* y, Matrix* y_pred) {
+double mean_absolute_error(const Matrix* y, const Matrix* y_pred) {
     double abs_diff_sum = 0;
     for (int row_count=0; row_count < y->rows; row_count++) {
         double diff = get_element(y, row_count, 0) - get_element(y_pred, row_count, 0);
@@ -42,7 +39,7 @@ double mean_absolute_error(Matrix* y, Matrix* y_pred) {
     return (abs_diff_sum / y->rows);
 }
 
-Matrix* mean_absolute_error_derivative(Matrix* y, Matrix* y_pred) {
+Matrix mean_absolute_error_derivative(const Matrix* y, const Matrix* y_pred) {
     // Creates matrix of MAE's partial derivatives with respect to each of the predictions.
     Matrix gradient_matrix = create_matrix(y->rows, 1);
 
@@ -67,13 +64,10 @@ Matrix* mean_absolute_error_derivative(Matrix* y, Matrix* y_pred) {
         }
     }
 
-    Matrix* output = malloc(sizeof(Matrix));
-    *output = gradient_matrix;
-
-    return output;
+    return gradient_matrix;
 }
 
-double binary_cross_entropy(Matrix* y, Matrix* y_pred) {
+double binary_cross_entropy(const Matrix* y, const Matrix* y_pred) {
     const double epsilon = 1e-15;
     double sum = 0;
 
@@ -96,8 +90,8 @@ double binary_cross_entropy(Matrix* y, Matrix* y_pred) {
     return (sum / y->rows);
 }
 
-Matrix* binary_cross_entropy_derivative(Matrix* y, Matrix* y_pred) {
-    // Creates matrix of MCE's partial derivatives with respect to each of the predictions.
+Matrix binary_cross_entropy_derivative(const Matrix* y, const Matrix* y_pred) {
+    // Creates matrix of BCE's partial derivatives with respect to each of the predictions.
     const double epsilon = 1e-15;
     Matrix gradient_matrix = create_matrix(y->rows, 1);
 
@@ -116,8 +110,5 @@ Matrix* binary_cross_entropy_derivative(Matrix* y, Matrix* y_pred) {
         set_element(&gradient_matrix, row_count, 0, grad);
     }
 
-    Matrix* output = malloc(sizeof(Matrix));
-    *output = gradient_matrix;
-
-    return output;
+    return gradient_matrix;
 }
