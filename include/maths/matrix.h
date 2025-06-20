@@ -10,6 +10,9 @@ typedef struct Matrix {
 // Creates a matrix with the given dimensions, with all elements initialised to 0.
 Matrix create_matrix(int rows, int cols);
 
+// Returns an empty matrix, with dimensions of 0 by 0 and with data pointer set to NULL.
+Matrix empty_matrix();
+
 // Frees memory allocated to matrix that is no longer needed.
 void free_matrix(Matrix* matrix);
 
@@ -30,6 +33,9 @@ Matrix matrix_multiplication(const Matrix* matrix_a, const Matrix* matrix_b);
 
 // Calculates and returns the resulting matrix from performing the Hadamard product of two matrices.
 Matrix hadamard_product(const Matrix* matrix_a, const Matrix* matrix_b);
+
+// Multiplies each element in a matrix by a scalar value.
+Matrix matrix_scalar_multiplication(const Matrix* matrix, double multiplier);
 
 // Constructs and returns the transpose of the matrix.
 Matrix transpose(const Matrix* matrix);

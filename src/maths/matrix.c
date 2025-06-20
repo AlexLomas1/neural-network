@@ -28,6 +28,12 @@ Matrix create_matrix(int rows, int cols) {
     return new_matrix;
 }
 
+Matrix empty_matrix() {
+    // Returns an empty matrix, with dimensions of 0 by 0 and with data pointer set to NULL.
+    Matrix empty = {0, 0, NULL};
+    return empty;
+}
+
 void free_matrix(Matrix* matrix) {
     // Frees memory allocated to matrix that is no longer needed.
     if (matrix->data != NULL) {
@@ -124,6 +130,19 @@ Matrix hadamard_product(const Matrix* matrix_a, const Matrix* matrix_b) {
             double ele_result = ele_a * ele_b;
 
             set_element(&result, row_count, col_count, ele_result);
+        }
+    }
+
+    return result;
+}
+
+Matrix matrix_scalar_multiplication(const Matrix* matrix, double multiplier) {
+    // Multiplies each element in a matrix by a scalar value.
+    Matrix result = create_matrix(matrix->rows, matrix->cols);
+    for (int row_count=0; row_count < matrix->rows; row_count++) {
+        for (int col_count=0; col_count < matrix->cols; col_count++) {
+            double ele = get_element(matrix, row_count, col_count);
+            set_element(&result, row_count, col_count, ele * multiplier);
         }
     }
 

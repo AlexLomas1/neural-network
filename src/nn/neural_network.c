@@ -14,11 +14,11 @@ static Layer init_layer(int input_size, int output_size, const ActivationFunc* a
     new_layer.num_nodes = output_size;
 
     // Filling with empty matrices so no errors if they are freed before a forward pass is performed.
-    new_layer.z = create_matrix(0, 0);
-    new_layer.a = create_matrix(0, 0);
-    new_layer.dL_dz = create_matrix(0, 0);
-    new_layer.dL_dw = create_matrix(0, 0);
-    new_layer.dL_db = create_matrix(0, 0);
+    new_layer.z = empty_matrix();
+    new_layer.a = empty_matrix();
+    new_layer.dL_dz = empty_matrix();
+    new_layer.dL_dw = empty_matrix();
+    new_layer.dL_db = empty_matrix();
 
     return new_layer;
 }
