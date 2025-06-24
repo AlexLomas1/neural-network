@@ -29,14 +29,8 @@ Network init_neural_net(int num_layers, int input_nodes, int layer_sizes[], cons
     new_network.num_layers = num_layers;
     new_network.layers = calloc(num_layers, sizeof(Layer));
 
-    int input_size;
     for (int i=0; i < num_layers; i++) {
-        if (i==0) {
-            input_size = input_nodes;
-        }
-        else {
-            input_size = new_network.layers[i-1].num_nodes;
-        }
+        int input_size = (i==0) ? input_nodes : new_network.layers[i-1].num_nodes;
 
         new_network.layers[i] = init_layer(input_size, layer_sizes[i], activations[i]);
     }
@@ -91,7 +85,7 @@ Matrix forward_pass(Network* net, const Matrix* input) {
         free_matrix(&net->layers[i].z);
         free_matrix(&net->layers[i].a);
         temp = matrix_multiplication(&net->layers[i].weights, &layer_in);
-        layer_out = matrix_addition(&temp, &net->layers[i].biases);
+        layer_out = matrix_broadcast_addition(&temp, &net->layers[i].biases);
         net->layers[i].z = copy_matrix(&layer_out);
         free_matrix(&temp);
 
