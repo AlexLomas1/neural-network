@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include "nn/neural_network.h"
 #include "maths/matrix.h"
@@ -69,17 +68,9 @@ Matrix forward_pass(Network* net, const Matrix* input) {
     Matrix layer_in, temp, layer_out;
     layer_in = copy_matrix(input);
 
-    printf("Input:\n");
-    display_matrix(&layer_in);
-
     // Simple feedforward process: each layer's output is calculated, and given to the next layer as 
     // input until the output layer is reached. 
     for (int i=0; i < net->num_layers; i++) {
-        printf("\nWeights:\n");
-        display_matrix(&net->layers[i].weights);
-        printf("\nBiases:\n");
-        display_matrix(&net->layers[i].biases);
-
         // The pre-activation output, z, of each layer is calculated as z = wx + b, where x is the input
         // matrix, w is the weight matrix of the layer, and b is the bias matrix of the layer.
         free_matrix(&net->layers[i].z);
@@ -89,20 +80,8 @@ Matrix forward_pass(Network* net, const Matrix* input) {
         net->layers[i].z = copy_matrix(&layer_out);
         free_matrix(&temp);
 
-        printf("\nLayer output pre-activation:\n");
-        display_matrix(&layer_out);
-
         apply_func(&layer_out, net->layers[i].activation->func_ptr);
         net->layers[i].a = copy_matrix(&layer_out);
-
-        if (i != (net->num_layers-1)) {
-            printf("\nLayer output post-activation:\n");
-        }
-        else {
-            printf("\nResult:\n");
-        }
-
-        display_matrix(&layer_out);
 
         free_matrix(&layer_in);
         layer_in = layer_out;

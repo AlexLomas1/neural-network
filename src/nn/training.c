@@ -1,10 +1,12 @@
 #include <stdio.h>
+#include "nn/training.h"
+#include "nn/neural_network.h"
 #include "maths/matrix.h"
 #include "maths/activation.h"
 #include "maths/loss.h"
-#include "nn/neural_network.h"
 
-static Matrix mean_columns(const Matrix* matrix) {
+static Matrix mean_rows(const Matrix* matrix) {
+    // Returns a column vector, with each element as the mean of the corresponding row in the input matrix.
     Matrix result = create_matrix(matrix->rows, 1);
     for (int row_count=0; row_count < matrix->rows; row_count++) {
         double sum = 0.0;
@@ -19,7 +21,7 @@ static Matrix mean_columns(const Matrix* matrix) {
     return result;
 }
 
-void backpropagation(Network* net, const Matrix* input, const Matrix* loss_deriv) { 
+static void backpropagation(Network* net, const Matrix* input, const Matrix* loss_deriv) { 
     Layer* output_layer= &net->layers[net->num_layers-1];
 
     // Freeing derivative matrices before overwriting
@@ -28,7 +30,7 @@ void backpropagation(Network* net, const Matrix* input, const Matrix* loss_deriv
     free_matrix(&output_layer->dL_db);
 
     // dL_dz = dL_da * da_dz
-    Matrix dL_da = copy_matrix(loss_deriv); // loss_func->derivative_ptr(y, y_pred)
+    Matrix dL_da = copy_matrix(loss_deriv);
     Matrix da_dz = copy_matrix(&output_layer->z);
     apply_func(&da_dz, output_layer->activation->derivative_ptr);
     output_layer->dL_dz = hadamard_product(&dL_da, &da_dz);
@@ -47,10 +49,9 @@ void backpropagation(Network* net, const Matrix* input, const Matrix* loss_deriv
     free_matrix(&dz_dw);
 
     // dL_db = dL_dz * dz_db = dL_dz * 1
-    output_layer->dL_db = mean_columns(&output_layer->dL_dz);
+    output_layer->dL_db = mean_rows(&output_layer->dL_dz);
 
     for (int layer_count=net->num_layers-2; layer_count >= 0; layer_count--) {
-        printf("Layer: %d\n", layer_count);
         Layer* curr_layer = &net->layers[layer_count];
         Layer* next_layer = &net->layers[layer_count+1];
         
@@ -81,12 +82,11 @@ void backpropagation(Network* net, const Matrix* input, const Matrix* loss_deriv
         free_matrix(&dz_dw);
 
         // dL_db = dL_dz * dz_db = dL_dz * 1
-        curr_layer->dL_db = mean_columns(&curr_layer->dL_dz);
+        curr_layer->dL_db = mean_rows(&curr_layer->dL_dz);
     }
-    printf("Backpropagation completed, hopefully with no incompatable matrix dimensions errors\n");
 }
 
-void gradient_descent(Network* net, double learning_rate) {
+static void gradient_descent(Network* net, double learning_rate) {
     // Updates the weights and biases of each layer based on gradients calculated from backpropagation
     // and the learning rate.
     for (int layer_count=0; layer_count < net->num_layers; layer_count++) {
@@ -97,30 +97,28 @@ void gradient_descent(Network* net, double learning_rate) {
         free_matrix(&curr_layer->weights);
         free_matrix(&diff);
         curr_layer->weights = copy_matrix(&new_weights);
+        free_matrix(&new_weights);
 
         diff = matrix_scalar_multiplication(&curr_layer->dL_db, -learning_rate);
         Matrix new_biases = matrix_addition(&curr_layer->biases, &diff);
         free_matrix(&curr_layer->biases);
         free_matrix(&diff);
         curr_layer->biases = copy_matrix(&new_biases);
-
-        display_matrix(&curr_layer->weights);
-        printf("\n");
-        display_matrix(&curr_layer->biases);
-        printf("\n");
+        free_matrix(&new_biases);
     }
 }
 
-void train_step(Network* net, const Matrix* input, const Matrix* expected_output, const LossFunc* loss_func, double learning_rate) {
+static void train_step(Network* net, const Matrix* input, const Matrix* expected_output, 
+    const LossFunc* loss_func, double learning_rate) {
     // Performs one training step: forward pass, loss calculation, backward pass, and parameter updates.
     Matrix output = forward_pass(net, input);
-    printf("\n");
+    printf("Output: \n");
+    display_matrix(&output);
     printf("Correct output:\n");
     display_matrix(expected_output);
-    printf("\n");
 
     double loss_val = loss_func->func_ptr(expected_output, &output);
-    printf("Loss: %f \n", loss_val);
+    printf("Loss: %f \n \n", loss_val);
     Matrix loss_deriv = loss_func->derivative_ptr(expected_output, &output);
     backpropagation(net, input, &loss_deriv);
     free_matrix(&output);
@@ -129,66 +127,11 @@ void train_step(Network* net, const Matrix* input, const Matrix* expected_output
     gradient_descent(net, learning_rate);
 }
 
-void training_loop(Network* net, int num_epoch, const Matrix* input, const Matrix* expected_output, const LossFunc* loss_func) {
+void training_loop(Network* net, int num_epoch, const Matrix* input, const Matrix* expected_output, 
+    const LossFunc* loss_func) {
     for (int epoch_count=0; epoch_count < num_epoch; epoch_count++) {
         // Learning rate hardcoded and fixed for now, maybe could be made non-constant later
+        printf("Epoch %d:\n", epoch_count+1);
         train_step(net, input, expected_output, loss_func, 0.1);
     }
-}
-
-int main() { // test sequence for now, to be removed later
-    // Layer sizes, number of layers, and activation functions hardcoded for now. In future, these could
-    // be retrieved from a seperate file.
-    int layer_sizes[2];
-    layer_sizes[0] = 2;
-    layer_sizes[1] = 1;
-
-    const ActivationFunc* activations[2];
-    activations[0] = &tanh_custom;
-    activations[1] = &sigmoid;
-
-    Network test_net;
-    test_net = init_neural_net(2, 2, layer_sizes, activations);
-
-    // Setting initial weights and biases.
-    set_element(&test_net.layers[0].weights, 0, 0, 0.3);
-    set_element(&test_net.layers[0].weights, 0, 1, -0.6);
-    set_element(&test_net.layers[0].weights, 1, 0, 0.75);
-    set_element(&test_net.layers[0].weights, 1, 1, -0.9);
-
-    set_element(&test_net.layers[0].biases, 0, 0, 0);
-    set_element(&test_net.layers[0].biases, 1, 0, 0);
-
-    set_element(&test_net.layers[1].weights, 0, 0, 0.4);
-    set_element(&test_net.layers[1].weights, 0, 1, -0.7);
-
-    set_element(&test_net.layers[1].biases, 0, 0, 0);
-
-    // Note that the input and expected output is an XOR gate
-    Matrix input = create_matrix(2, 4); // 2 features, 4 samples
-    set_element(&input, 0, 0, 0);
-    set_element(&input, 1, 0, 0);
-
-    set_element(&input, 0, 1, 0);
-    set_element(&input, 1, 1, 1);
-
-    set_element(&input, 0, 2, 1);
-    set_element(&input, 1, 2, 0);
-    
-    set_element(&input, 0, 3, 1);
-    set_element(&input, 1, 3, 1); 
-
-    Matrix expected_output = create_matrix(1, 4);
-    set_element(&expected_output, 0, 0, 0);
-    set_element(&expected_output, 0, 1, 1);
-    set_element(&expected_output, 0, 2, 1);
-    set_element(&expected_output, 0, 3, 0);
-
-    // 1000 epochs is more than is necessary for 100% accuracy, but gives greater probability calibration
-    training_loop(&test_net, 1000, &input, &expected_output, &BCE);
-
-    // Freeing allocated memory.
-    free_network(&test_net);
-    free_matrix(&input);
-    free_matrix(&expected_output);
 }
