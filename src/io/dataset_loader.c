@@ -3,7 +3,7 @@
 #include <string.h>
 #include "maths/matrix.h"
 
-void get_dataset_dimensions(FILE* file, int* rows_out, int* cols_out) {
+static void get_dataset_dimensions(FILE* file, int* rows_out, int* cols_out) {
     char line[4096];
 
     int cols_count=1; // Start at 1, as there is one more column then number of commas in one line.
@@ -31,7 +31,7 @@ void get_dataset_dimensions(FILE* file, int* rows_out, int* cols_out) {
     rewind(file);
 }
 
-void fill_matrices_from_dataset(FILE* file, Matrix* input, Matrix* expected_output) {
+static void fill_matrices_from_dataset(FILE* file, Matrix* input, Matrix* expected_output) {
     char line[4096];
 
     // Skipping first line as it is just for headers.
@@ -56,7 +56,7 @@ void fill_matrices_from_dataset(FILE* file, Matrix* input, Matrix* expected_outp
     }
 }
 
-void create_matrices(const char* file_path, Matrix* input, Matrix* expected_output) {
+void load_dataset_to_matrices(const char* file_path, Matrix* input, Matrix* expected_output) {
     FILE* file = fopen(file_path, "r");
     if (!file) {
         printf("Error opening dataset file\n");

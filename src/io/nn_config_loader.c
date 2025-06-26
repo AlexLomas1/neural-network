@@ -6,7 +6,7 @@
 #include "maths/activation.h"
 #include "maths/loss.h"
 
-char* read_file(const char* file_path) {
+static char* read_file(const char* file_path) {
     // Reads a file, and returns the file contents as a string.
     FILE* file = fopen(file_path, "r");
     if (!file) {
@@ -26,14 +26,14 @@ char* read_file(const char* file_path) {
     return buffer;
 }
 
-int extract_int(const char* data, const char* param_name) {
+static int extract_int(const char* data, const char* param_name) {
     // Finds first occurance of param_name, and returns the value following it as an integer.
     char* pos = strstr(data, param_name); 
     pos = strchr(pos, ':'); 
     return atoi(pos+1); 
 }
 
-char* extract_string(const char* data, const char* param_name) {
+static char* extract_string(const char* data, const char* param_name) {
     // Finds first occurance of param_name, and returns the value of the string following it.
     char* pos = strstr(data, param_name);
     pos = strchr(pos, ':');
@@ -50,7 +50,7 @@ char* extract_string(const char* data, const char* param_name) {
     return value;
 }
 
-void extract_layer(const char* file, int layer_num, int* layer_size_out, const ActivationFunc** activation_out) {
+static void extract_layer(const char* file, int layer_num, int* layer_size_out, const ActivationFunc** activation_out) {
     // Extracts the number of nodes and the activation function for the specified layer
     char* pos = strstr(file, "\"layers\"");
     
@@ -85,7 +85,7 @@ void extract_layer(const char* file, int layer_num, int* layer_size_out, const A
     }
 }
 
-Network set_neural_net(char* file_path) {
+Network build_network_from_config(char* file_path) {
     // Builds and returns a Network struct defined by a JSON config file.
     char* file_data = read_file(file_path);
 
@@ -111,7 +111,7 @@ Network set_neural_net(char* file_path) {
 
 int main() {
     // Creating the network 
-    Network test_net = set_neural_net("data/nn_config/xor_nn.json");
+    Network test_net = build_network_from_config("data/nn_config/xor_nn.json");
 
     // Setting initial weights and biases.
     set_element(&test_net.layers[0].weights, 0, 0, 0.3);
