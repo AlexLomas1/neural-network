@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "io/nn_config_loader.h"
 #include "nn/neural_network.h"
 #include "nn/training.h"
 #include "maths/activation.h"

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "io/dataset_loader.h"
 #include "maths/matrix.h"
 
 static void get_dataset_dimensions(FILE* file, int* rows_out, int* cols_out) {
