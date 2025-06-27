@@ -2,6 +2,7 @@
 #include "nn/neural_network.h"
 #include "maths/matrix.h"
 #include "maths/activation.h"
+#include "maths/softmax.h"
 
 static Layer init_layer(int input_size, int output_size, const ActivationFunc* activation) {
     // Initialises a layer with weight and bias matrices having all elements as zero.
@@ -80,7 +81,14 @@ Matrix forward_pass(Network* net, const Matrix* input) {
         net->layers[i].z = copy_matrix(&layer_out);
         free_matrix(&temp);
 
-        apply_func(&layer_out, net->layers[i].activation->func_ptr);
+        if (net->layers[i].activation == &softmax) {
+            free_matrix(&layer_out);
+            layer_out = softmax_func(&net->layers[i].z);
+        }
+        else {
+            apply_func(&layer_out, net->layers[i].activation->func_ptr);
+        }
+
         net->layers[i].a = copy_matrix(&layer_out);
 
         free_matrix(&layer_in);

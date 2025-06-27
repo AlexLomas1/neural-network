@@ -3,6 +3,7 @@
 #include "nn/neural_network.h"
 #include "maths/matrix.h"
 #include "maths/activation.h"
+#include "maths/softmax.h"
 #include "maths/loss.h"
 
 static Matrix mean_rows(const Matrix* matrix) {
@@ -30,12 +31,17 @@ static void backpropagation(Network* net, const Matrix* input, const Matrix* los
     free_matrix(&output_layer->dL_db);
 
     // dL_dz = dL_da * da_dz
-    Matrix dL_da = copy_matrix(loss_deriv);
-    Matrix da_dz = copy_matrix(&output_layer->z);
-    apply_func(&da_dz, output_layer->activation->derivative_ptr);
-    output_layer->dL_dz = hadamard_product(&dL_da, &da_dz);
-    free_matrix(&dL_da);
-    free_matrix(&da_dz);
+    if (output_layer->activation == &softmax) {
+        output_layer->dL_dz = softmax_derivative(&output_layer->a, loss_deriv);
+    }
+    else {
+        Matrix dL_da = copy_matrix(loss_deriv);
+        Matrix da_dz = copy_matrix(&output_layer->z);
+        apply_func(&da_dz, output_layer->activation->derivative_ptr);
+        output_layer->dL_dz = hadamard_product(&dL_da, &da_dz);
+        free_matrix(&dL_da);
+        free_matrix(&da_dz);
+    }
 
     // dL_dw = dL_dz * dz_dw
     Matrix dz_dw;
