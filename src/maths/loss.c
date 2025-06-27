@@ -6,6 +6,9 @@
 const LossFunc MSE = {&mean_squared_error, &mean_squared_error_derivative};
 const LossFunc MAE = {&mean_absolute_error, &mean_absolute_error_derivative};
 const LossFunc BCE = {&binary_cross_entropy, &binary_cross_entropy_derivative};
+const LossFunc CCE = {&categorical_cross_entropy, &categorical_cross_entropy_derivative};
+
+static const double epsilon = 1e-15;
 
 double mean_squared_error(const Matrix* y, const Matrix* y_pred) {
     double squared_diff_sum = 0.0;
@@ -73,7 +76,6 @@ Matrix mean_absolute_error_derivative(const Matrix* y, const Matrix* y_pred) {
 }
 
 double binary_cross_entropy(const Matrix* y, const Matrix* y_pred) {
-    const double epsilon = 1e-15;
     double sum = 0.0;
     
     for (int col_count=0; col_count < y->cols; col_count++) { // Each column represents a sample
@@ -99,7 +101,6 @@ double binary_cross_entropy(const Matrix* y, const Matrix* y_pred) {
 
 Matrix binary_cross_entropy_derivative(const Matrix* y, const Matrix* y_pred) {
     // Creates matrix of BCE's partial derivatives with respect to each of the predictions.
-    const double epsilon = 1e-15;
     Matrix gradient_matrix = create_matrix(y->rows, y->cols);
 
     for (int col_count=0; col_count < y->cols; col_count++) {
@@ -115,6 +116,49 @@ Matrix binary_cross_entropy_derivative(const Matrix* y, const Matrix* y_pred) {
             }
 
             double grad = (-1.0/(y->rows * y->cols)) * ((y_i/y_pred_i) - ((1-y_i) / (1-y_pred_i)));
+            set_element(&gradient_matrix, row_count, col_count, grad);
+        }
+    }
+
+    return gradient_matrix;
+}
+
+double categorical_cross_entropy(const Matrix* y, const Matrix* y_pred) {
+    double sum = 0.0;
+
+    for (int col_count=0; col_count < y->cols; col_count++) {
+        for (int row_count=0; row_count < y->rows; row_count++) {
+            double y_i = get_element(y, row_count, col_count);
+            double y_pred_i = get_element(y_pred, row_count, col_count);
+
+            if (y_pred_i < epsilon) {
+                y_pred_i = epsilon;
+            }
+            else if (y_pred_i > 1.0 - epsilon) {
+                y_pred_i = 1.0 - epsilon;
+            }
+
+            sum += -y_i * log(y_pred_i);
+        }
+    }
+
+    return (sum / y->cols);
+}
+
+Matrix categorical_cross_entropy_derivative(const Matrix* y, const Matrix* y_pred) {
+    // Creates matrix of CCE's partial derivatives with respect to each of the predictions.
+    Matrix gradient_matrix = create_matrix(y->rows, y->cols);
+
+    for (int col_count=0; col_count < y->cols; col_count++) {
+        for (int row_count=0; row_count < y->rows; row_count++) {
+            double y_i = get_element(y, row_count, col_count);
+            double y_pred_i = get_element(y_pred, row_count, col_count);
+
+            if (y_pred_i < epsilon) { // Preventing division by 0
+                y_pred_i = epsilon; 
+            }
+
+            double grad = -(y_i / y_pred_i) / y->cols;
             set_element(&gradient_matrix, row_count, col_count, grad);
         }
     }
