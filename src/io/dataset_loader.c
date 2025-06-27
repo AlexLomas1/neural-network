@@ -77,16 +77,3 @@ void load_dataset_to_matrices(const char* file_path, Matrix* input, Matrix* expe
 
     fclose(file);
 }
-
-int main() {
-    Matrix input, expected_output;
-
-    create_matrices("data/datasets/xor_train.csv", &input, &expected_output);
-
-    display_matrix(&input);
-    printf("\n");
-    display_matrix(&expected_output);
-
-    free_matrix(&input);
-    free_matrix(&expected_output);
-}

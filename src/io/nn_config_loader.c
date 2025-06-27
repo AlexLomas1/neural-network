@@ -3,9 +3,7 @@
 #include <string.h>
 #include "io/nn_config_loader.h"
 #include "nn/neural_network.h"
-#include "nn/training.h"
 #include "maths/activation.h"
-#include "maths/loss.h"
 
 static char* read_file(const char* file_path) {
     // Reads a file, and returns the file contents as a string.
@@ -108,51 +106,4 @@ Network build_network_from_config(char* file_path) {
     free(file_data);
 
     return init_neural_net(num_layers, input_nodes, layer_sizes, activations);
-}
-
-int main() {
-    // Creating the network 
-    Network test_net = build_network_from_config("data/nn_config/xor_nn.json");
-
-    // Setting initial weights and biases.
-    set_element(&test_net.layers[0].weights, 0, 0, 0.3);
-    set_element(&test_net.layers[0].weights, 0, 1, -0.6);
-    set_element(&test_net.layers[0].weights, 1, 0, 0.75);
-    set_element(&test_net.layers[0].weights, 1, 1, -0.9);
-
-    set_element(&test_net.layers[0].biases, 0, 0, 0);
-    set_element(&test_net.layers[0].biases, 1, 0, 0);
-
-    set_element(&test_net.layers[1].weights, 0, 0, 0.4);
-    set_element(&test_net.layers[1].weights, 0, 1, -0.7);
-
-    set_element(&test_net.layers[1].biases, 0, 0, 0);
-
-    // Note that the input and expected output is an XOR gate
-    Matrix input = create_matrix(2, 4); // 2 features, 4 samples
-    set_element(&input, 0, 0, 0);
-    set_element(&input, 1, 0, 0);
-
-    set_element(&input, 0, 1, 0);
-    set_element(&input, 1, 1, 1);
-
-    set_element(&input, 0, 2, 1);
-    set_element(&input, 1, 2, 0);
-    
-    set_element(&input, 0, 3, 1);
-    set_element(&input, 1, 3, 1); 
-
-    Matrix expected_output = create_matrix(1, 4);
-    set_element(&expected_output, 0, 0, 0);
-    set_element(&expected_output, 0, 1, 1);
-    set_element(&expected_output, 0, 2, 1);
-    set_element(&expected_output, 0, 3, 0);
-
-    // 1000 epochs is more than is necessary for 100% accuracy, but gives greater probability calibration
-    training_loop(&test_net, 1000, &input, &expected_output, &BCE);
-
-    // Freeing allocated memory.
-    free_network(&test_net);
-    free_matrix(&input);
-    free_matrix(&expected_output);
 }
