@@ -4,11 +4,14 @@
 #include "maths/activation.h"
 #include "maths/softmax.h"
 
-static Layer init_layer(int input_size, int output_size, const ActivationFunc* activation) {
-    // Initialises a layer with weight and bias matrices having all elements as zero.
+static Layer init_layer(int input_size, int output_size, const ActivationFunc* activation, 
+    const WeightInit weight_init_fn) {
+    // Initialises a layer with weight matrix initialised using the weight_init function, and the bias
+    // matrix having all elements as zero.
     Layer new_layer;
 
     new_layer.weights = create_matrix(output_size, input_size);
+    weight_init_fn(&new_layer.weights);
     new_layer.biases = create_matrix(output_size, 1);
     new_layer.activation = activation;
     new_layer.num_nodes = output_size;
@@ -23,7 +26,8 @@ static Layer init_layer(int input_size, int output_size, const ActivationFunc* a
     return new_layer;
 }
 
-Network init_neural_net(int num_layers, int input_nodes, int layer_sizes[], const ActivationFunc* activations[]) {
+Network init_neural_net(int num_layers, int input_nodes, int layer_sizes[], const ActivationFunc* activations[],
+    const WeightInit weight_init_fns[]) {
     // Initialises a neural network with the given number of layers, and number of nodes for each layer.
     Network new_network;
     new_network.num_layers = num_layers;
@@ -32,7 +36,7 @@ Network init_neural_net(int num_layers, int input_nodes, int layer_sizes[], cons
     for (int i=0; i < num_layers; i++) {
         int input_size = (i==0) ? input_nodes : new_network.layers[i-1].num_nodes;
 
-        new_network.layers[i] = init_layer(input_size, layer_sizes[i], activations[i]);
+        new_network.layers[i] = init_layer(input_size, layer_sizes[i], activations[i], weight_init_fns[i]);
     }
 
     return new_network;

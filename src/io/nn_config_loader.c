@@ -3,6 +3,7 @@
 #include <string.h>
 #include "io/nn_config_loader.h"
 #include "nn/neural_network.h"
+#include "nn/weight_init.h"
 #include "maths/activation.h"
 
 static char* read_file(const char* file_path) {
@@ -49,7 +50,8 @@ static char* extract_string(const char* data, const char* param_name) {
     return value;
 }
 
-static void extract_layer(const char* file, int layer_num, int* layer_size_out, const ActivationFunc** activation_out) {
+static void extract_layer(const char* file, int layer_num, int* layer_size_out, 
+    const ActivationFunc** activation_out, WeightInit* weight_init_fn_out) {
     // Extracts the number of nodes and the activation function for the specified layer
     char* pos = strstr(file, "\"layers\"");
     
@@ -75,6 +77,16 @@ static void extract_layer(const char* file, int layer_num, int* layer_size_out, 
             }
             free(activation_str);
 
+            char* weight_init_str = extract_string(pos, "\"weight_init\"");
+
+            if (strcasecmp(weight_init_str, "Xavier") == 0) {
+                *weight_init_fn_out = Xavier;
+            }
+            else if (strcasecmp(weight_init_str, "He") == 0) {
+                *weight_init_fn_out = He;
+            }
+            free(weight_init_str);
+
             return;
         }
         else {
@@ -93,17 +105,20 @@ Network build_network_from_config(char* file_path) {
 
     int layer_sizes[num_layers];
     const ActivationFunc* activations[num_layers];
+    WeightInit weight_init_fns[num_layers];
 
     for (int i=0; i < num_layers; i++) {
         int curr_layer_size;
         const ActivationFunc* curr_activation_func;
-        extract_layer(file_data, i, &curr_layer_size, &curr_activation_func);
+        WeightInit weight_init_fn;
+        extract_layer(file_data, i, &curr_layer_size, &curr_activation_func, &weight_init_fn);
 
         layer_sizes[i] = curr_layer_size;
         activations[i] = curr_activation_func;
+        weight_init_fns[i] = weight_init_fn;
     }
 
     free(file_data);
 
-    return init_neural_net(num_layers, input_nodes, layer_sizes, activations);
+    return init_neural_net(num_layers, input_nodes, layer_sizes, activations, weight_init_fns);
 }

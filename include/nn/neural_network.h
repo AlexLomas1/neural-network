@@ -3,8 +3,9 @@
 
 #include "maths/matrix.h" // For Matrix struct and matrix operations
 
-// Forward declaration of struct defined in activation.h
+// Forward declaration of struct defined in activation.h, and typedef defined in weight_init.h
 typedef struct ActivationFunc ActivationFunc;
+typedef void (*WeightInit)(struct Matrix*);
 
 typedef struct Layer {
     Matrix weights;
@@ -26,7 +27,8 @@ typedef struct Network {
 } Network;
 
 // Initialises a neural network with the given number of layers, and number of nodes for each layer.
-Network init_neural_net(int num_layers, int input_nodes, int layer_sizes[], const ActivationFunc* activations[]);
+Network init_neural_net(int num_layers, int input_nodes, int layer_sizes[], const ActivationFunc* activations[],
+    const WeightInit weight_init_fns[]);
 
 // Frees memory allocated to pointers and matrices in a Network struct and its Layer structs.
 void free_network(Network* net);
