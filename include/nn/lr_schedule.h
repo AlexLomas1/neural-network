@@ -26,6 +26,6 @@ typedef struct LearningRateSchedule {
     } param;
 } LearningRateSchedule;
 
-double update_learning_rate(double learning_rate, int current_epoch, const LearningRateSchedule* schedule);
+double update_learning_rate(int current_epoch, const LearningRateSchedule* schedule);
 
 #endif

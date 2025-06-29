@@ -1,6 +1,6 @@
-#include <stdio.h>
 #include "nn/training.h"
 #include "nn/neural_network.h"
+#include "nn/lr_schedule.h"
 #include "maths/matrix.h"
 #include "maths/activation.h"
 #include "maths/softmax.h"
@@ -118,15 +118,10 @@ static void train_step(Network* net, const Matrix* input, const Matrix* expected
     const LossFunc* loss_func, double learning_rate) {
     // Performs one training step: forward pass, loss calculation, backward pass, and parameter updates.
     Matrix output = forward_pass(net, input);
-    printf("Output: \n");
-    display_matrix(&output);
-    printf("Correct output:\n");
-    display_matrix(expected_output);
 
-    double loss_val = loss_func->func_ptr(expected_output, &output);
-    printf("Loss: %f \n \n", loss_val);
     Matrix loss_deriv = loss_func->derivative_ptr(expected_output, &output);
     backpropagation(net, input, &loss_deriv);
+    
     free_matrix(&output);
     free_matrix(&loss_deriv);
 
@@ -134,10 +129,11 @@ static void train_step(Network* net, const Matrix* input, const Matrix* expected
 }
 
 void training_loop(Network* net, int num_epoch, const Matrix* input, const Matrix* expected_output, 
-    const LossFunc* loss_func) {
+    const LossFunc* loss_func, const LearningRateSchedule* lr_schedule) {
+
+    double learning_rate = lr_schedule->base_lr;
     for (int epoch_count=0; epoch_count < num_epoch; epoch_count++) {
-        // Learning rate hardcoded and fixed for now, maybe could be made non-constant later
-        printf("Epoch %d:\n", epoch_count+1);
-        train_step(net, input, expected_output, loss_func, 0.1);
+        train_step(net, input, expected_output, loss_func, learning_rate);
+        learning_rate = update_learning_rate(epoch_count, lr_schedule);
     }
 }
