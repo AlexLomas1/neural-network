@@ -4,23 +4,16 @@
 #include "io/dataset_loader.h"
 #include "maths/matrix.h"
 
-static void get_dataset_dimensions(FILE* file, int* rows_out, int* cols_out) {
+static void get_dataset_dimensions(FILE* file, int* inputs_out, int* outputs_out, int* rows_out) {
     char line[4096];
 
-    int cols_count=1; // Start at 1, as there is one more column then number of commas in one line.
     fgets(line, 4096, file);
-    const char* c = line;
-    while (*c) { // Repeats until end of line is reached.
-        if (*c == ',') {
-            cols_count++;
-        }
-        c++;
+    // Reading comment in first row to determine the number of input and output parameters
+    if (sscanf(line, "# INPUTS: %d, OUTPUTS: %d", inputs_out, outputs_out) != 2) {
+        printf("Error retrieving the number of input and output parameters from dataset\n");
     }
 
-    *cols_out = cols_count;
-
-    rewind(file);
-    fgets(line, 4096, file); // First row is purposefully skipped as that is a header row.
+    fgets(line, 4096, file); // Skipping header row
 
     int rows_count=0;
     while (fgets(line, 4096, file) != NULL) { 
@@ -29,18 +22,20 @@ static void get_dataset_dimensions(FILE* file, int* rows_out, int* cols_out) {
 
     *rows_out = rows_count;
 
-    rewind(file);
+    rewind(file); 
 }
 
 static void fill_matrices_from_dataset(FILE* file, Matrix* input, Matrix* expected_output) {
     char line[4096];
 
-    // Skipping first line as it is just for headers.
+    // Skipping first and second lines as they are comments and headers respectively.
+    fgets(line, 4096, file);
     fgets(line, 4096, file);
 
     int sample_index = 0;
     while (fgets(line, 4096, file) != NULL) {
         char* token = strtok(line, ",");
+        // Filling the input matrix.
         for (int feature_index=0; feature_index < input->rows; feature_index++) {
             if (!token) {
                 break;
@@ -49,8 +44,13 @@ static void fill_matrices_from_dataset(FILE* file, Matrix* input, Matrix* expect
             token = strtok(NULL, ","); 
         }
 
-        if (token) {
-            set_element(expected_output, 0, sample_index, atof(token));
+        // Filling the output matrix.
+        for (int output_index=0; output_index < expected_output->rows; output_index++) {
+            if (!token) {
+                break;
+            }
+            set_element(expected_output, output_index, sample_index, atof(token));
+            token = strtok(NULL, ","); 
         }
 
         sample_index++;
@@ -64,14 +64,11 @@ void load_dataset_to_matrices(const char* file_path, Matrix* input, Matrix* expe
         return;
     }
 
-    int samples_count, features_count;
-    get_dataset_dimensions(file, &samples_count, &features_count);
+    int input_rows, output_rows, samples_count;
+    get_dataset_dimensions(file, &input_rows, &output_rows, &samples_count);
 
-    int input_rows = features_count - 1; // Assuming 1 output feature per sample.
-    int input_cols = samples_count; 
-
-    *input = create_matrix(input_rows, input_cols);
-    *expected_output = create_matrix(1, input_cols);
+    *input = create_matrix(input_rows, samples_count);
+    *expected_output = create_matrix(output_rows, samples_count);
 
     fill_matrices_from_dataset(file, input, expected_output);
 
