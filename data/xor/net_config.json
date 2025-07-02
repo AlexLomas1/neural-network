@@ -1,0 +1,8 @@
+{
+    "input_nodes": 2,
+    "num_layers": 2,
+    "layers": [
+        {"nodes": 2, "activation": "tanh", "weight_init": "Xavier"},
+        {"nodes": 1, "activation": "sigmoid", "weight_init": "Xavier"}
+    ]
+}

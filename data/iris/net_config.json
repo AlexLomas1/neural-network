@@ -1,0 +1,9 @@
+{
+    "input_nodes": 4,
+    "num_layers": 3,
+    "layers": [
+        {"nodes": 10, "activation": "tanh", "weight_init": "Xavier"},
+        {"nodes": 8, "activation": "tanh", "weight_init": "Xavier"},
+        {"nodes": 3, "activation": "softmax", "weight_init": "Xavier"}
+    ]
+}

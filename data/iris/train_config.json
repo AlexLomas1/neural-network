@@ -1,0 +1,6 @@
+{
+    "loss": "CCE",
+    "num_epoch": 50,
+    "learning_rate": 0.1,
+    "lr_schedule": "FIXED"
+}
