@@ -129,11 +129,18 @@ static void train_step(Network* net, const Matrix* input, const Matrix* expected
 }
 
 void training_loop(Network* net, int num_epoch, const Matrix* input, const Matrix* expected_output, 
-    const LossFunc* loss_func, const LearningRateSchedule* lr_schedule) {
+    const LossFunc* loss_func, const LearningRateSchedule* lr_schedule, TrainingReport report_progress,
+    int report_freq) {
 
     double learning_rate = lr_schedule->base_lr;
     for (int epoch_count=0; epoch_count < num_epoch; epoch_count++) {
         train_step(net, input, expected_output, loss_func, learning_rate);
         learning_rate = update_learning_rate(epoch_count, lr_schedule);
+        if ((epoch_count+1) % report_freq == 0 || epoch_count + 1 == num_epoch) {
+            Matrix output = forward_pass(net, input);
+            double loss_val = loss_func->func_ptr(expected_output, &output);
+            free_matrix(&output);
+            report_progress(epoch_count+1, num_epoch, loss_val);
+        }
     }
 }
