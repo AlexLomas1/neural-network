@@ -1,0 +1,10 @@
+{
+    "loss": "CCE",
+    "num_epoch": 50,
+    "learning_rate": 0.5,
+    "lr_schedule": "STEP_DECAY",
+    "lr_schedule_params": [
+        {"decay_factor": 0.75},
+        {"step_size": 10}
+    ]
+}

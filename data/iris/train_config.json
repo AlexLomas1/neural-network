@@ -1,6 +1,9 @@
 {
     "loss": "CCE",
-    "num_epoch": 50,
+    "num_epoch": 100,
     "learning_rate": 0.1,
-    "lr_schedule": "FIXED"
+    "lr_schedule": "EXP_DECAY",
+    "lr_schedule_params": [
+        {"decay_rate": 0.005}
+    ]
 }

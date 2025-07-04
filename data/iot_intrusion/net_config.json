@@ -1,0 +1,11 @@
+{
+    "input_nodes": 10,
+    "num_layers": 5,
+    "layers": [
+        {"nodes": 64, "activation": "ReLu", "weight_init": "He"},
+        {"nodes": 48, "activation": "ReLu", "weight_init": "He"},
+        {"nodes": 32, "activation": "ReLu", "weight_init": "He"},
+        {"nodes": 32, "activation": "ReLu", "weight_init": "He"},
+        {"nodes": 5, "activation": "softmax", "weight_init": "Xavier"}
+    ]
+}
